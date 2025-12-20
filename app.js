@@ -122,9 +122,19 @@ function nextCharacter() {
     return;
   }
 
-  // Random selection from pool
-  const randomIndex = Math.floor(Math.random() * state.exercisePool.length);
-  state.currentCharacter = state.exercisePool[randomIndex];
+  const previousCharacter = state.currentCharacter;
+
+  // Random selection from pool, avoiding the same character
+  let randomIndex;
+  if (state.exercisePool.length > 1 && previousCharacter) {
+    // Filter out the previous character and pick from remaining
+    const availableChars = state.exercisePool.filter(char => char !== previousCharacter);
+    randomIndex = Math.floor(Math.random() * availableChars.length);
+    state.currentCharacter = availableChars[randomIndex];
+  } else {
+    randomIndex = Math.floor(Math.random() * state.exercisePool.length);
+    state.currentCharacter = state.exercisePool[randomIndex];
+  }
 
   // Update display
   elements.currentCharacter.textContent = state.currentCharacter;
