@@ -162,6 +162,13 @@ function checkAnswer() {
   const userAnswer = elements.pinyinInput.value.trim().toLowerCase();
   if (!userAnswer) return;
 
+  // Show hint if user types "help" or "hint"
+  if (userAnswer === 'help' || userAnswer === 'hint') {
+    elements.pinyinInput.value = '';
+    showHint();
+    return;
+  }
+
   // Get all possible pinyin readings for the character
   const validReadings = getPinyin(state.currentCharacter, false, true);
 
