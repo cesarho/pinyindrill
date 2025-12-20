@@ -232,6 +232,7 @@ function handleIncorrectAnswer() {
 function showFeedback(message, type) {
   elements.feedback.textContent = message;
   elements.feedback.className = `feedback show ${type}`;
+  elements.hintDisplay.classList.add('hidden');
 }
 
 // Clear feedback
@@ -256,6 +257,7 @@ function showHint() {
   const hintText = readings.length > 1 ? readings.join(' / ') : readings[0];
   elements.hintDisplay.textContent = hintText;
   elements.hintDisplay.classList.remove('hidden');
+  clearFeedback();
 
   // Reset streak when hint is used
   const charProgress = getCharProgress(state.currentCharacter);
