@@ -136,17 +136,24 @@ function nextCharacter() {
 }
 
 // Get pinyin for a character
-function getPinyin(char, withTone = false) {
+// Returns array of all possible readings when multiple=true
+function getPinyin(char, withTone = false, multiple = false) {
   try {
     // Use pinyin-pro library (exposed as global 'pinyinPro')
     const options = {
-      toneType: withTone ? 'symbol' : 'none'
+      toneType: withTone ? 'symbol' : 'none',
+      multiple: multiple
     };
     const result = pinyinPro.pinyin(char, options);
+    if (multiple) {
+      // Result is space-separated when multiple=true, split and dedupe
+      const readings = result.toLowerCase().split(' ');
+      return [...new Set(readings)];
+    }
     return result.toLowerCase();
   } catch (e) {
     console.error('Error getting pinyin:', e);
-    return '';
+    return multiple ? [] : '';
   }
 }
 
@@ -155,9 +162,10 @@ function checkAnswer() {
   const userAnswer = elements.pinyinInput.value.trim().toLowerCase();
   if (!userAnswer) return;
 
-  const correctPinyin = getPinyin(state.currentCharacter, false);
+  // Get all possible pinyin readings for the character
+  const validReadings = getPinyin(state.currentCharacter, false, true);
 
-  if (userAnswer === correctPinyin) {
+  if (validReadings.includes(userAnswer)) {
     handleCorrectAnswer();
   } else {
     handleIncorrectAnswer();
@@ -169,8 +177,12 @@ function handleCorrectAnswer() {
   const charProgress = getCharProgress(state.currentCharacter);
   charProgress.correctStreak++;
 
-  // Show success feedback
-  showFeedback('Correct!', 'correct');
+  // Get pinyin with tones to show in feedback
+  const readings = getPinyin(state.currentCharacter, true, true);
+  const answerText = readings.length > 1 ? readings.join(' / ') : readings[0];
+
+  // Show success feedback with the answer
+  showFeedback(`${answerText}`, 'correct');
 
   // Check if mastered
   if (charProgress.correctStreak >= state.MASTERY_THRESHOLD) {
@@ -187,7 +199,7 @@ function handleCorrectAnswer() {
     const masteredCount = totalInExercise - state.exercisePool.length;
     elements.progressText.textContent = `${masteredCount} / ${totalInExercise}`;
 
-    showFeedback('Mastered! 🎉', 'correct');
+    showFeedback(`Mastered! 🎉 ${answerText}`, 'correct');
   }
 
   saveProgress();
@@ -238,8 +250,11 @@ function updateStreakDisplay() {
 
 // Show hint (pinyin with tones)
 function showHint() {
-  const pinyinWithTone = getPinyin(state.currentCharacter, true);
-  elements.hintDisplay.textContent = pinyinWithTone;
+  // Get all possible readings with tones
+  const readings = getPinyin(state.currentCharacter, true, true);
+  // Join multiple readings with " / " separator
+  const hintText = readings.length > 1 ? readings.join(' / ') : readings[0];
+  elements.hintDisplay.textContent = hintText;
   elements.hintDisplay.classList.remove('hidden');
 
   // Reset streak when hint is used
