@@ -1,0 +1,458 @@
+/* CSS Variables */
+:root {
+  --bg-primary: #0f0f12;
+  --bg-secondary: #1a1a21;
+  --bg-tertiary: #252530;
+  --text-primary: #f0f0f5;
+  --text-secondary: #9090a0;
+  --text-muted: #606070;
+  --accent: #e8c547;
+  --accent-hover: #f5d668;
+  --accent-dim: #b39830;
+  --success: #4ade80;
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.1);
+  --success-bg: rgba(74, 222, 128, 0.1);
+  --border: #2a2a35;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --font-chinese: 'Noto Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --font-mono: 'Space Mono', 'Consolas', monospace;
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-mono);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(232, 197, 71, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(232, 197, 71, 0.02) 0%, transparent 50%);
+}
+
+/* App Container */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Screens */
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.screen.hidden {
+  display: none;
+}
+
+/* Menu Screen */
+.header {
+  text-align: center;
+  padding: 2rem 0 3rem;
+}
+
+.title {
+  font-family: var(--font-chinese);
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 40px rgba(232, 197, 71, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+/* Exercise Grid */
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+  flex: 1;
+  align-content: start;
+}
+
+.exercise-btn {
+  font-family: var(--font-mono);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exercise-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-dim);
+  transform: translateY(-2px);
+}
+
+.exercise-btn:active {
+  transform: translateY(0);
+}
+
+.exercise-btn .range {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.exercise-btn .progress {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.exercise-btn.completed {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+.exercise-btn.completed .progress {
+  color: var(--success);
+}
+
+/* Menu Footer */
+.menu-footer {
+  text-align: center;
+  padding: 2rem 0;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+.menu-footer p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.reset-btn {
+  font-family: var(--font-mono);
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.2s ease;
+}
+
+.reset-btn:hover {
+  background: var(--error-bg);
+}
+
+/* Practice Screen */
+.practice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-btn {
+  font-family: var(--font-mono);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.back-btn:hover {
+  color: var(--accent);
+}
+
+.progress-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+#progress-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.mastered-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* Practice Main */
+.practice-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  gap: 2rem;
+}
+
+/* Character Display */
+.character-display {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px var(--shadow);
+}
+
+.character {
+  font-family: var(--font-chinese);
+  font-size: 8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+/* Feedback */
+.feedback-container {
+  min-height: 3rem;
+  text-align: center;
+}
+
+.feedback {
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.feedback.show {
+  opacity: 1;
+}
+
+.feedback.correct {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.feedback.incorrect {
+  color: var(--error);
+  background: var(--error-bg);
+}
+
+.hint-display {
+  font-size: 1.5rem;
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.hint-display.hidden {
+  display: none;
+}
+
+/* Input Container */
+.input-container {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.pinyin-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.pinyin-input:focus {
+  border-color: var(--accent);
+}
+
+.pinyin-input::placeholder {
+  color: var(--text-muted);
+}
+
+.pinyin-input.error {
+  border-color: var(--error);
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.hint-btn {
+  font-family: var(--font-mono);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.hint-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Streak Info */
+.streak-info {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+#streak-text {
+  color: var(--text-secondary);
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.modal-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+.modal-content p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.modal-btn {
+  font-family: var(--font-mono);
+  background: var(--accent);
+  border: none;
+  color: var(--bg-primary);
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+
+.modal-btn:hover {
+  background: var(--accent-hover);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .exercise-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .character-display {
+    width: 160px;
+    height: 160px;
+  }
+
+  .character {
+    font-size: 6rem;
+  }
+
+  .input-container {
+    flex-direction: column;
+  }
+
+  .hint-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .screen {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .exercise-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .exercise-btn {
+    padding: 1rem 0.75rem;
+  }
+}
+
