@@ -333,6 +333,26 @@ function setupEventListeners() {
       goToMenu();
     }
   });
+
+  // Scroll to top when input is focused (keyboard opens on mobile)
+  elements.pinyinInput.addEventListener('focus', () => {
+    // Use multiple methods to ensure scroll works on iOS Safari
+    const scrollToTop = () => {
+      // Method 1: scrollIntoView on character
+      elements.currentCharacter.scrollIntoView({ block: 'start', behavior: 'instant' });
+
+      // Method 2: scroll window and document
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    };
+
+    // Try immediately and after delays to catch keyboard animation
+    scrollToTop();
+    setTimeout(scrollToTop, 50);
+    setTimeout(scrollToTop, 150);
+    setTimeout(scrollToTop, 300);
+  });
 }
 
 // Start the app when DOM is ready
