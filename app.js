@@ -26,7 +26,8 @@ const elements = {
   feedback: document.getElementById('feedback'),
   streakText: document.getElementById('streak-text'),
   completionModal: document.getElementById('completion-modal'),
-  modalClose: document.getElementById('modal-close')
+  modalClose: document.getElementById('modal-close'),
+  resetChapterBtn: document.getElementById('reset-chapter')
 };
 
 // Initialize the app
@@ -305,6 +306,26 @@ function resetProgress() {
   }
 }
 
+// Reset progress for current chapter/exercise
+function resetChapterScore() {
+  const start = state.currentExercise * state.CHARS_PER_EXERCISE;
+  const end = Math.min(start + state.CHARS_PER_EXERCISE, CHARACTERS.length);
+  const chapterChars = CHARACTERS.slice(start, end);
+
+  // Reset progress for all characters in this chapter
+  chapterChars.forEach(char => {
+    if (state.progress[char]) {
+      state.progress[char] = { correctStreak: 0, mastered: false };
+    }
+  });
+
+  saveProgress();
+
+  // Hide modal and restart the exercise
+  elements.completionModal.classList.add('hidden');
+  startExercise(state.currentExercise);
+}
+
 // Setup event listeners
 function setupEventListeners() {
   // Back button
@@ -318,6 +339,9 @@ function setupEventListeners() {
 
   // Modal close
   elements.modalClose.addEventListener('click', goToMenu);
+
+  // Reset chapter score
+  elements.resetChapterBtn.addEventListener('click', resetChapterScore);
 
   // Input handling (Enter or Space to submit)
   elements.pinyinInput.addEventListener('keydown', (e) => {

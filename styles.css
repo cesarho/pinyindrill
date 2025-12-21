@@ -420,6 +420,25 @@ body {
   background: var(--accent-hover);
 }
 
+.modal-link-btn {
+  display: block;
+  margin: 1rem auto 0;
+  font-family: var(--font-mono);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.modal-link-btn:hover {
+  color: var(--text-secondary);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .title {
