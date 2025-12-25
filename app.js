@@ -7,6 +7,7 @@ const state = {
   currentCharacter: null,
   exercisePool: [],
   progress: {},
+  advancedMode: false,
   MASTERY_THRESHOLD: 5,
   CHARS_PER_EXERCISE: 100
 };
@@ -27,14 +28,17 @@ const elements = {
   streakText: document.getElementById('streak-text'),
   completionModal: document.getElementById('completion-modal'),
   modalClose: document.getElementById('modal-close'),
-  resetChapterBtn: document.getElementById('reset-chapter')
+  resetChapterBtn: document.getElementById('reset-chapter'),
+  advancedModeToggle: document.getElementById('advanced-mode-toggle')
 };
 
 // Initialize the app
 function init() {
   loadProgress();
+  loadAdvancedMode();
   renderExerciseGrid();
   setupEventListeners();
+  updatePlaceholder();
 }
 
 // Load progress from localStorage
@@ -43,6 +47,22 @@ function loadProgress() {
   if (saved) {
     state.progress = JSON.parse(saved);
   }
+}
+
+// Load advanced mode preference from localStorage
+function loadAdvancedMode() {
+  const saved = localStorage.getItem('pinyinAdvancedMode');
+  if (saved !== null) {
+    state.advancedMode = saved === 'true';
+  }
+  if (elements.advancedModeToggle) {
+    elements.advancedModeToggle.checked = state.advancedMode;
+  }
+}
+
+// Save advanced mode preference to localStorage
+function saveAdvancedMode() {
+  localStorage.setItem('pinyinAdvancedMode', state.advancedMode.toString());
 }
 
 // Save progress to localStorage
@@ -113,6 +133,7 @@ function startExercise(exerciseIndex) {
 
   // Pick first character
   nextCharacter();
+  updatePlaceholder();
   elements.pinyinInput.focus();
 }
 
@@ -144,15 +165,17 @@ function nextCharacter() {
   elements.hintDisplay.classList.add('hidden');
   clearFeedback();
   updateStreakDisplay();
+  updatePlaceholder();
 }
 
 // Get pinyin for a character
 // Returns array of all possible readings when multiple=true
-function getPinyin(char, withTone = false, multiple = false) {
+// toneFormat: 'none' (no tone), 'symbol' (ā, á, etc.), 'num' (a1, a2, etc.)
+function getPinyin(char, toneFormat = 'none', multiple = false) {
   try {
     // Use pinyin-pro library (exposed as global 'pinyinPro')
     const options = {
-      toneType: withTone ? 'symbol' : 'none',
+      toneType: toneFormat,
       multiple: multiple
     };
     const result = pinyinPro.pinyin(char, options);
@@ -168,6 +191,60 @@ function getPinyin(char, withTone = false, multiple = false) {
   }
 }
 
+// Parse pinyin with tone number format (e.g., "ma1", "zhong1") to extract base and tone
+// Returns { base: 'ma', tone: 1 } or { base: 'ma', tone: null } for neutral tone
+function parsePinyinWithTone(pinyinWithTone) {
+  // Match pinyin ending with digit 1-4 (tone number)
+  const match = pinyinWithTone.match(/^(.+?)([1-4])$/);
+  if (match) {
+    return {
+      base: match[1],
+      tone: parseInt(match[2])
+    };
+  }
+
+  // No tone number - neutral tone
+  return {
+    base: pinyinWithTone,
+    tone: null
+  };
+}
+
+// Parse user input to extract pinyin base and tone number
+// Returns { base: 'ma', tone: 1 } or { base: 'ma', tone: null } for neutral, or null if invalid
+function parseUserInput(input) {
+  // Remove any whitespace
+  input = input.trim().toLowerCase();
+
+  // Check if input ends with a digit 1-4
+  const match = input.match(/^(.+?)([1-4])$/);
+  if (match) {
+    return {
+      base: match[1],
+      tone: parseInt(match[2])
+    };
+  }
+
+  // No tone number - could be neutral tone or invalid
+  // Return with tone: null to indicate no tone number provided
+  return {
+    base: input,
+    tone: null
+  };
+}
+
+// Update input placeholder based on mode
+function updatePlaceholder() {
+  if (elements.pinyinInput) {
+    if (state.advancedMode) {
+      elements.pinyinInput.placeholder = "type pinyin + tone (e.g., ma1)...";
+    } else {
+      elements.pinyinInput.placeholder = "type 'hint' for help...";
+    }
+  }
+}
+
+
 // Check user's answer
 function checkAnswer() {
   const userAnswer = elements.pinyinInput.value.trim().toLowerCase();
@@ -180,13 +257,46 @@ function checkAnswer() {
     return;
   }
 
-  // Get all possible pinyin readings for the character
-  const validReadings = getPinyin(state.currentCharacter, false, true);
+  if (state.advancedMode) {
+    // Advanced mode: check pinyin + tone
+    const parsed = parseUserInput(userAnswer);
 
-  if (validReadings.includes(userAnswer)) {
-    handleCorrectAnswer();
+    // Get all possible pinyin readings with tone numbers (e.g., "ma1", "ma2")
+    const validReadingsWithTones = getPinyin(state.currentCharacter, 'num', true);
+
+    // Check if any valid reading matches
+    let isCorrect = false;
+    for (let reading of validReadingsWithTones) {
+      const correctReading = parsePinyinWithTone(reading);
+
+      // Check if base and tone both match
+      if (correctReading.base === parsed.base) {
+        // Check tone match
+        // null tone means neutral tone (no tone number), user shouldn't input number
+        if (correctReading.tone === null && parsed.tone === null) {
+          isCorrect = true;
+          break;
+        } else if (correctReading.tone !== null && parsed.tone === correctReading.tone) {
+          isCorrect = true;
+          break;
+        }
+      }
+    }
+
+    if (isCorrect) {
+      handleCorrectAnswer();
+    } else {
+      handleIncorrectAnswer();
+    }
   } else {
-    handleIncorrectAnswer();
+    // Normal mode: check pinyin without tones (current behavior)
+    const validReadings = getPinyin(state.currentCharacter, 'none', true);
+
+    if (validReadings.includes(userAnswer)) {
+      handleCorrectAnswer();
+    } else {
+      handleIncorrectAnswer();
+    }
   }
 }
 
@@ -196,8 +306,16 @@ function handleCorrectAnswer() {
   charProgress.correctStreak++;
 
   // Get pinyin with tones to show in feedback
-  const readings = getPinyin(state.currentCharacter, true, true);
-  const answerText = readings.length > 1 ? readings.join(' / ') : readings[0];
+  let answerText;
+  if (state.advancedMode) {
+    // In advanced mode, show pinyin with tone numbers (e.g., "ma1", "ma2")
+    const readingsWithTones = getPinyin(state.currentCharacter, 'num', true);
+    answerText = readingsWithTones.length > 1 ? readingsWithTones.join(' / ') : readingsWithTones[0];
+  } else {
+    // Normal mode: show pinyin with tone symbols (e.g., "mā", "má")
+    const readings = getPinyin(state.currentCharacter, 'symbol', true);
+    answerText = readings.length > 1 ? readings.join(' / ') : readings[0];
+  }
 
   // Show success feedback with the answer
   showFeedback(`${answerText}`, 'correct');
@@ -269,8 +387,8 @@ function updateStreakDisplay() {
 
 // Show hint (pinyin with tones)
 function showHint() {
-  // Get all possible readings with tones
-  const readings = getPinyin(state.currentCharacter, true, true);
+  // Get all possible readings with tones (using symbol format as per plan - keep unchanged)
+  const readings = getPinyin(state.currentCharacter, 'symbol', true);
   // Join multiple readings with " / " separator
   const hintText = readings.length > 1 ? readings.join(' / ') : readings[0];
   elements.hintDisplay.textContent = hintText;
@@ -342,6 +460,15 @@ function setupEventListeners() {
 
   // Reset chapter score
   elements.resetChapterBtn.addEventListener('click', resetChapterScore);
+
+  // Advanced mode toggle
+  if (elements.advancedModeToggle) {
+    elements.advancedModeToggle.addEventListener('change', (e) => {
+      state.advancedMode = e.target.checked;
+      saveAdvancedMode();
+      updatePlaceholder();
+    });
+  }
 
   // Input handling (Enter or Space to submit)
   elements.pinyinInput.addEventListener('keydown', (e) => {
